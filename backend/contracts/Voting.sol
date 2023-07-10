@@ -41,4 +41,60 @@ contract Voting {
         require(block.timestamp <= votes[voteId].endTime, "vote has ended");
         _;
     }
+
+    function join() external {
+        require(!members[msg.sender], "you are already a member");
+        members[msg.sender] = true;
+        emit MemberJoined(msg.sender, block.timestamp);
+    }
+
+    function createVote(
+        string memory uri,
+        uint256 endTime,
+        uint256 options
+    ) external isMember {
+        require(
+            options >= 2 && options <= 8,
+            "number of options must be between 2 and 8"
+        );
+        require(endTime > block.timestamp, "end time cannot be in past");
+        uint256 voteId = nextVoteId;
+
+        votes[voteId].uri = uri;
+        votes[voteId].owner = msg.sender;
+        votes[voteId].endTime = endTime;
+        votes[voteId].options = options;
+        votes[voteId].votes = new uint256[](options);
+
+        emit VoteCreated(msg.sender, voteId, block.timestamp, endTime);
+        nextVoteId++;
+    }
+
+    function vote(uint256 voteId, uint256 option)
+        external
+        isMember
+        canVote(voteId, option)
+    {
+        votes[voteId].votes[option] = votes[voteId].votes[option] + 1;
+        votes[voteId].voted[msg.sender] = true;
+        emit Voted(msg.sender, voteId, option, block.timestamp);
+    }
+
+    function getVote(uint256 voteId)
+        public
+        view
+        returns (
+            string memory,
+            address,
+            uint256[] memory,
+            uint256
+        )
+    {
+        return (
+            votes[voteId].uri,
+            votes[voteId].owner,
+            votes[voteId].votes,
+            votes[voteId].endTime
+        );
+    }
 }
