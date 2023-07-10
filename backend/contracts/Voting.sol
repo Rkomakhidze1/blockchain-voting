@@ -97,4 +97,12 @@ contract Voting {
             votes[voteId].endTime
         );
     }
+
+    function didVote(address member, uint256 voteId)
+        public
+        view
+        returns (bool)
+    {
+        return votes[voteId].voted[member];
+    }
 }
