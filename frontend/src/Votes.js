@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import Card from "react-bootstrap/Card";
 import ProgressBar from "react-bootstrap/ProgressBar";
@@ -6,6 +6,62 @@ import ProgressBar from "react-bootstrap/ProgressBar";
 const Votes = ({ contract }) => {
   const gateway = "https://gateway.pinata.cloud/";
   const [votes, setVotes] = useState([]);
+
+  useEffect(() => {
+    if (!contract) return;
+
+    const filter = contract.filters.VoteCreated();
+    contract
+      .queryFilter(filter)
+      .then((result) => {
+        setVotesData(result);
+      })
+      .catch((error) => console.log(error));
+  }, [contract]);
+
+  const votePressed = async (id, optionIdx) => {
+    await contract.vote(id, optionIdx).catch((error) => alert(error.message));
+
+    alert("Success");
+  };
+
+  const setVotesData = async (votes) => {
+    const promises = [];
+    const newVotes = [];
+    for (const vote of votes) {
+      const { owner, voteId, createdAt, endTime } = vote.args;
+      const promise = contract.getVote(voteId).then(async (voteData) => {
+        const uri = voteData[0];
+        if (!uri) return;
+
+        const currentVotes = voteData[2];
+        const currentVotesNumbers = currentVotes.map((val) => val.toNumber());
+
+        const newVote = {
+          id: voteId.toNumber(),
+          owner: owner,
+          createdAt: createdAt.toNumber(),
+          endTime: endTime.toNumber(),
+          totalVotes: currentVotesNumbers.reduce(
+            (sum, value) => sum + value,
+            0
+          ),
+          votes: currentVotesNumbers,
+        };
+
+        try {
+          const data = await (await fetch(gateway + uri)).json();
+          newVote.description = data.description;
+          newVote.options = data.options;
+          newVotes.push(newVote);
+        } catch {}
+      });
+      promises.push(promise);
+    }
+
+    await Promise.all(promises);
+    setVotes(newVotes);
+  };
 
   return (
     <div>
@@ -25,7 +81,13 @@ const Votes = ({ contract }) => {
                     label={`${vote.votes[idx]}`}
                     className="w-100 me-2"
                   />
-                  <Button size="sm" variant="dark">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      votePressed(vote.id, idx);
+                    }}
+                    variant="dark"
+                  >
                     Vote
                   </Button>
                 </div>
