@@ -58,4 +58,27 @@ describe("Voting", function () {
       );
     });
   });
+
+  describe("Vote", () => {
+    it("Cannot vote if not member", async () => {
+      await expect(voting.connect(addr1).vote(0, 0)).to.be.reverted;
+    });
+    it("Cannot vote on vote that doesn't exist", async () => {
+      await expect(voting.vote(2, 0)).to.be.reverted;
+    });
+    it("Cannot vote on invalid option", async () => {
+      await expect(voting.vote(0, 9)).to.be.reverted;
+    });
+    it("Can vote", async () => {
+      await expect(voting.vote(0, 0)).to.emit(voting, "Voted");
+    });
+    it("Cannot vote twice", async () => {
+      await expect(voting.vote(0, 1)).to.be.reverted;
+    });
+    it("Cannot vote on expired vote", async () => {
+      await voting.connect(addr1).join();
+      await ethers.provider.send("evm_mine", [(await getTime()) + 3600]);
+      await expect(voting.connect(addr1).vote(0, 0)).to.be.reverted;
+    });
+  });
 });
