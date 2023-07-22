@@ -3,6 +3,7 @@ import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { connect } from "./contract";
 import Navbar from "./Navbar";
+import CreateVotes from "./CreateVotes";
 
 
 function App() {
@@ -44,7 +45,10 @@ function App() {
       />
       <div className="container">
         <Routes>
-      
+          <Route
+              path="create-vote"
+              element={<CreateVotes contract={contract} />}
+            />
         </Routes>
       </div>
     </Router>
