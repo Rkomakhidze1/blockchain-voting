@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { connect } from "./contract";
 import Navbar from "./Navbar";
 import CreateVotes from "./CreateVotes";
+import Votes from "./Votes";
 
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
               path="create-vote"
               element={<CreateVotes contract={contract} />}
             />
+          <Route path="votes" element={<Votes contract={contract} />} />
         </Routes>
       </div>
     </Router>
