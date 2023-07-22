@@ -28,4 +28,9 @@ contract Voting {
         uint256 indexed option,
         uint256 createdAt
     );
+
+    modifier isMember() {
+    require(members[msg.sender], "you are not a member");
+        _;
+    }
 }
