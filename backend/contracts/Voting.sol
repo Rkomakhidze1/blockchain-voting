@@ -34,6 +34,14 @@ contract Voting {
         _;
     }
 
+    modifier canVote(uint256 voteId, uint256 option) {
+        require(voteId < nextVoteId, "vote does not exist");
+        require(option < votes[voteId].options, "invalid option");
+        require(!votes[voteId].voted[msg.sender], "you have already voted");
+        require(block.timestamp <= votes[voteId].endTime, "vote has ended");
+        _;
+    }
+
     function join() external {
         require(!members[msg.sender], "you are already a member");
         members[msg.sender] = true;
@@ -62,4 +70,13 @@ contract Voting {
         nextVoteId++;
     }
 
+    function vote(uint256 voteId, uint256 option)
+        external
+        isMember
+        canVote(voteId, option)
+    {
+        votes[voteId].votes[option] = votes[voteId].votes[option] + 1;
+        votes[voteId].voted[msg.sender] = true;
+        emit Voted(msg.sender, voteId, option, block.timestamp);
+    }
 }
