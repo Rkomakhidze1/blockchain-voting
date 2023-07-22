@@ -1,4 +1,3 @@
-import { id } from "ethers/lib/utils";
 import { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import Card from "react-bootstrap/Card";
@@ -52,13 +51,10 @@ const Votes = ({ contract }) => {
         };
 
         try {
-          await fetch(gateway + uri)
-            .then((result) => result.json())
-            .then((data) => {
-              newVote.description = data.description;
-              newVote.options = data.options;
-              newVotes.push(newVote);
-            });
+          const data = await (await fetch(gateway + uri)).json()
+          newVote.description = data.description;
+          newVote.options = data.options;
+          newVotes.push(newVote);
         } catch {}
       });
       promises.push(promise);
