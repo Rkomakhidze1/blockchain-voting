@@ -15,8 +15,9 @@ const CreateVote = ({ contract }) => {
 
     await contract
       .createVote(uri, new Date(endDate).getTime(), options)
-      .then(() => alert("Success"))
       .catch((error) => alert(error.message));
+      
+    alert('success')
   };
 
   return (

@@ -22,8 +22,9 @@ const Votes = ({ contract }) => {
   const votePressed = async (id, optionIdx) => {
     await contract
       .vote(id, optionIdx)
-      .then(() => alert("Success"))
       .catch((error) => alert(error.message));
+
+    alert("Success")
   };
 
   const setVotesData = async (votes) => {
